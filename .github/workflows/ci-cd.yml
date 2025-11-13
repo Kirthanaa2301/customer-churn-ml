@@ -24,8 +24,8 @@ jobs:
 
       - name: Run training notebook
         run: |
-          jupyter nbconvert --to notebook --execute notebooks/cust1_train.ipynb --output result_train.ipynb
+          jupyter nbconvert --to notebook --execute cust1_train.ipynb --output result_train.ipynb
 
       - name: Run prediction notebook
         run: |
-          jupyter nbconvert --to notebook --execute notebooks/cust1_prediction.ipynb --output result_predict.ipynb
+          jupyter nbconvert --to notebook --execute cust1_prediction.ipynb --output result_predict.ipynb
