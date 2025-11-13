@@ -35,7 +35,8 @@ jobs:
           jupyter nbconvert --to notebook --execute cust1_prediction.ipynb --output result_predict.ipynb
 
       - name: Upload predicted CSV as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: churn_predictions
           path: churn_predictions.csv
+
