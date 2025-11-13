@@ -1,12 +1,15 @@
-name: Customer Churn ML CI/CD
+name: CI/CD for Customer Churn ML Project
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  train_and_update_model:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,21 +19,39 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.10
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install jupyter nbconvert
+          python -m pip install --upgrade pip
+          pip install pandas numpy scikit-learn xgboost jupyter nbconvert seaborn matplotlib
 
       - name: Run training notebook
         run: |
           jupyter nbconvert --to notebook --execute cust1_train.ipynb --output result_train.ipynb
 
-      - name: Commit and push new model
+      - name: Run prediction notebook
+        run: |
+          jupyter nbconvert --to notebook --execute cust1_prediction.ipynb --output result_prediction.ipynb
+
+      - name: Commit and push model + prediction CSV
         run: |
           git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add model.pkl
-          git commit -m "Auto-update model from CI/CD" || echo "No changes to commit"
-          git push
+          git config --global user.email "actions@github.com"
+
+          # Add model and prediction output files
+          git add model.pkl || echo "No model file found"
+          git add cust1_churn_predictions.csv || echo "No prediction file found"
+
+          git commit -m "Auto-update model and predictions from CI/CD" || echo "No changes to commit"
+          git push || echo "Nothing to push"
+
+      - name: Upload Artifacts (optional for download)
+        uses: actions/upload-artifact@v4
+        with:
+          name: churn-results
+          path: |
+            result_train.ipynb
+            result_prediction.ipynb
+            model.pkl
+            cust1_churn_predictions.csv
