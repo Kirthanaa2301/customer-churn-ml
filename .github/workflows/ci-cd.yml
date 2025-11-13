@@ -1,10 +1,7 @@
-name: CI/CD for Customer Churn ML Project
+name: Customer Churn ML CI/CD
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -14,17 +11,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pandas numpy scikit-learn xgboost jupyter nbconvert seaborn matplotlib
+          pip install --upgrade pip
+          pip install pandas numpy scikit-learn xgboost matplotlib seaborn jupyter nbconvert
+
+      - name: List files (debugging)
+        run: ls -R
 
       - name: Run training notebook
         run: |
@@ -32,26 +32,10 @@ jobs:
 
       - name: Run prediction notebook
         run: |
-          jupyter nbconvert --to notebook --execute cust1_prediction.ipynb --output result_prediction.ipynb
+          jupyter nbconvert --to notebook --execute cust1_prediction.ipynb --output result_predict.ipynb
 
-      - name: Commit and push model + prediction CSV
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-
-          # Add model and prediction output files
-          git add model.pkl || echo "No model file found"
-          git add cust1_churn_predictions.csv || echo "No prediction file found"
-
-          git commit -m "Auto-update model and predictions from CI/CD" || echo "No changes to commit"
-          git push || echo "Nothing to push"
-
-      - name: Upload Artifacts (optional for download)
+      - name: Upload predicted CSV as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: churn-results
-          path: |
-            result_train.ipynb
-            result_prediction.ipynb
-            model.pkl
-            cust1_churn_predictions.csv
+          name: churn_predictions
+          path: cust1_churn_predictions.csv
