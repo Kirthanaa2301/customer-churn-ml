@@ -26,10 +26,12 @@ jobs:
 
     - name: Run Training Notebook
       run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/src
         jupyter nbconvert --to notebook --execute notebooks/cust1_train.ipynb --output notebooks/cust1_train_output.ipynb
 
     - name: Run Prediction Notebook
       run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)/src
         jupyter nbconvert --to notebook --execute notebooks/cust1_prediction.ipynb --output notebooks/cust1_prediction_output.ipynb
 
     - name: Upload Model Artifact
