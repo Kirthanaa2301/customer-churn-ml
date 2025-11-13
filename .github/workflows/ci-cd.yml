@@ -1,0 +1,47 @@
+name: CI/CD for Customer Churn Model
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Training Notebook
+      run: |
+        jupyter nbconvert --to notebook --execute notebooks/cust1_train.ipynb --output notebooks/cust1_train_output.ipynb
+
+    - name: Run Prediction Notebook
+      run: |
+        jupyter nbconvert --to notebook --execute notebooks/cust1_prediction.ipynb --output notebooks/cust1_prediction_output.ipynb
+
+    - name: Upload Model Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: trained-model
+        path: model/model.pkl
+
+    - name: Upload Executed Notebooks
+      uses: actions/upload-artifact@v4
+      with:
+        name: executed-notebooks
+        path: |
+          notebooks/cust1_train_output.ipynb
+          notebooks/cust1_prediction_output.ipynb
