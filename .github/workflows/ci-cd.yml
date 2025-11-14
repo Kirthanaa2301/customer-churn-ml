@@ -1,9 +1,10 @@
-name: Customer Churn ML CI/CD
+name: CI/CD - train & predict
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -11,20 +12,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install pandas numpy scikit-learn xgboost matplotlib seaborn jupyter nbconvert
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || pip install pandas numpy scikit-learn xgboost joblib jupyter nbconvert
 
-      - name: List files (debugging)
-        run: ls -R
+      - name: List files (debug)
+        run: ls -lah
 
       - name: Run training notebook
         run: |
@@ -32,9 +33,12 @@ jobs:
 
       - name: Run prediction notebook
         run: |
-          jupyter nbconvert --to notebook --execute cust1_prediction.ipynb --output result_predict.ipynb
+          jupyter nbconvert --to notebook --execute cust1_prediction.ipynb --output result_prediction.ipynb
 
-      - name: Upload predicted CSV as artifact
+      - name: Show resulting files (debug)
+        run: ls -lah
+
+      - name: Upload prediction CSV artifact
         uses: actions/upload-artifact@v4
         with:
           name: churn_predictions
